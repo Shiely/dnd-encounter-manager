@@ -1,8 +1,10 @@
 // src-tauri/src/domain/tests.rs
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::{Combatant, HitPoints, Condition, UndoStack, DamageCommand, HealCommand, Encounter};
+    use crate::domain::{
+        Combatant, HitPoints, Condition, UndoStack,
+        DamageCommand, HealCommand, Encounter,
+    };
 
     #[test]
     fn test_hit_points_damage_and_heal() {
