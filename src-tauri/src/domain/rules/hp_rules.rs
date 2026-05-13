@@ -1,6 +1,6 @@
 // DOMAIN LAYER: stdlib imports only.
 
-pub fn apply_hp_edit(current_hp: i32, new_value: i32) -> i32 {
+pub fn apply_hp_edit(_current_hp: i32, new_value: i32) -> i32 {
     new_value.max(0)
 }
 
