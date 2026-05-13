@@ -71,7 +71,7 @@ impl Encounter {
         }
     }
 
-    pub fn execute_command(&mut self, command: Box<dyn Command>, target_id: &str) -> Option<String> {
+    pub fn execute_command(&mut self, mut command: Box<dyn Command>, target_id: &str) -> Option<String> {
         if let Some(combatant) = self.get_combatant_mut(target_id) {
             command.execute(combatant);
             let desc = command.description();
@@ -83,8 +83,10 @@ impl Encounter {
     }
 
     pub fn undo_last(&mut self) -> Option<String> {
-        if let Some(target_id) = self.get_last_command_target() {
-            if let Some(combatant) = self.get_combatant_mut(&target_id) {
+        // Get the last command's target before borrowing undo_stack
+        let target_id = self.get_last_command_target();
+        if let Some(id) = target_id {
+            if let Some(combatant) = self.get_combatant_mut(&id) {
                 return self.undo_stack.undo_last(combatant);
             }
         }
