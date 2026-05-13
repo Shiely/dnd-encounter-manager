@@ -1,5 +1,5 @@
 // src-tauri/tests/domain_tests.rs
-use dnd_encounter_manager::domain::{
+use dnd_encounter_manager_lib::domain::{
     Combatant, HitPoints, Condition, UndoStack,
     DamageCommand, HealCommand, Encounter,
 };
@@ -46,10 +46,10 @@ fn test_encounter_add_and_sort() {
     let mut encounter = Encounter::new("e1".to_string(), "Test Encounter".to_string());
 
     let mut c1 = Combatant::new("1".to_string(), "Goblin".to_string(), 10, false);
-    c1.initiative = dnd_encounter_manager::domain::Initiative::new(12);
+    c1.initiative = dnd_encounter_manager_lib::domain::Initiative::new(12);
 
     let mut c2 = Combatant::new("2".to_string(), "Hero".to_string(), 25, true);
-    c2.initiative = dnd_encounter_manager::domain::Initiative::new(18);
+    c2.initiative = dnd_encounter_manager_lib::domain::Initiative::new(18);
 
     encounter.add_combatant(c1);
     encounter.add_combatant(c2);
