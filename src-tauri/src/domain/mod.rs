@@ -4,5 +4,7 @@ pub mod value_objects;
 pub mod commands;
 pub mod encounter;
 
-#[cfg(test)]
-mod tests;
+pub use entities::*;
+pub use value_objects::*;
+pub use commands::*;
+pub use encounter::*;
