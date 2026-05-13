@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/dnd-encounter-manager/schema/v1.json",
+  "title": "DnD Encounter Manager Import Schema",
+  "description": "Canonical import schema for D&D 5e (2014) monster definitions and encounter entities.",
+  "type": "object",
+  "required": ["monsters"],
+  "additionalProperties": false,
+  "properties": {
+    "monsters": {
+      "type": "array",
+      "description": "Array of monster definitions to import into the persistent monster DB.",
+      "items": { "$ref": "#/definitions/MonsterDefinition" }
+    },
+    "encounter": {
+      "$ref": "#/definitions/Encounter",
+      "description": "Optional encounter snapshot. If present, populates or restores the active encounter."
+    }
+  },
+  "definitions": {
+    "AbilityScores": {
+      "type": "object",
+      "description": "Standard six ability scores.",
+      "required": ["str", "dex", "con", "int", "wis", "cha"],
+      "additionalProperties": false,
+      "properties": {
+        "str": { "type": "integer", "minimum": 1 },
+        "dex": { "type": "integer", "minimum": 1 },
+        "con": { "type": "integer", "minimum": 1 },
+        "int": { "type": "integer", "minimum": 1 },
+        "wis": { "type": "integer", "minimum": 1 },
+        "cha": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "DiceExpression": {
+      "type": "string",
+      "description": "A dice expression such as '2d8+4' or '10'.",
+      "pattern": "^(\\d+d\\d+([+-]\\d+)?|\\d+)$"
+    },
+    "ChallengeRating": {
+      "description": "Challenge rating as a string fraction or integer (e.g. '1/4', '1/2', '1', '10').",
+      "type": "string",
+      "pattern": "^(0|1\\/8|1\\/4|1\\/2|[1-9][0-9]*)$"
+    },
+    "Action": {
+      "type": "object",
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "attack_bonus": { "type": "integer" },
+        "damage": { "$ref": "#/definitions/DiceExpression" },
+        "damage_type": { "type": "string" }
+      }
+    },
+    "SpecialAbility": {
+      "type": "object",
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "MonsterDefinition": {
+      "type": "object",
+      "description": "Reusable stat block for a monster type stored in the persistent DB.",
+      "required": [
+        "id", "name", "size", "type", "alignment",
+        "armor_class", "hit_points", "hit_dice", "speed", "ability_scores",
+        "challenge_rating", "xp"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique stable identifier for this monster type (e.g. 'goblin', 'adult-red-dragon')."
+        },
+        "name": { "type": "string" },
+        "size": {
+          "type": "string",
+          "enum": ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"]
+        },
+        "type": { "type": "string", "description": "Creature type (e.g. 'humanoid', 'dragon', 'undead')." },
+        "subtype": { "type": "string" },
+        "alignment": { "type": "string" },
+        "armor_class": { "type": "integer", "minimum": 1 },
+        "armor_desc": { "type": "string", "description": "Description of armor source (e.g. 'natural armor')." },
+        "hit_points": { "type": "integer", "minimum": 1, "description": "Average HP used as default max HP for instances." },
+        "hit_dice": { "$ref": "#/definitions/DiceExpression" },
+        "speed": {
+          "type": "object",
+          "description": "Movement speeds in feet.",
+          "properties": {
+            "walk": { "type": "integer", "minimum": 0 },
+            "fly": { "type": "integer", "minimum": 0 },
+            "swim": { "type": "integer", "minimum": 0 },
+            "climb": { "type": "integer", "minimum": 0 },
+            "burrow": { "type": "integer", "minimum": 0 },
+            "hover": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "ability_scores": { "$ref": "#/definitions/AbilityScores" },
+        "saving_throws": {
+          "type": "object",
+          "description": "Saving throw proficiency bonuses (only include proficient saves).",
+          "properties": {
+            "str": { "type": "integer" },
+            "dex": { "type": "integer" },
+            "con": { "type": "integer" },
+            "int": { "type": "integer" },
+            "wis": { "type": "integer" },
+            "cha": { "type": "integer" }
+          },
+          "additionalProperties": false
+        },
+        "skills": {
+          "type": "object",
+          "description": "Skill proficiency bonuses keyed by skill name (e.g. 'perception': 5).",
+          "additionalProperties": { "type": "integer" }
+        },
+        "damage_vulnerabilities": { "type": "array", "items": { "type": "string" } },
+        "damage_resistances": { "type": "array", "items": { "type": "string" } },
+        "damage_immunities": { "type": "array", "items": { "type": "string" } },
+        "condition_immunities": { "type": "array", "items": { "type": "string" } },
+        "senses": {
+          "type": "object",
+          "properties": {
+            "darkvision": { "type": "integer", "description": "Range in feet." },
+            "blindsight": { "type": "integer" },
+            "tremorsense": { "type": "integer" },
+            "truesight": { "type": "integer" },
+            "passive_perception": { "type": "integer" }
+          },
+          "additionalProperties": false
+        },
+        "challenge_rating": { "$ref": "#/definitions/ChallengeRating" },
+        "xp": { "type": "integer", "minimum": 0 },
+        "proficiency_bonus": { "type": "integer", "minimum": 0 },
+        "special_abilities": { "type": "array", "items": { "$ref": "#/definitions/SpecialAbility" } },
+        "actions": { "type": "array", "items": { "$ref": "#/definitions/Action" } },
+        "bonus_actions": { "type": "array", "items": { "$ref": "#/definitions/Action" } },
+        "reactions": { "type": "array", "items": { "$ref": "#/definitions/Action" } },
+        "legendary_actions": { "type": "array", "items": { "$ref": "#/definitions/Action" } },
+        "legendary_resistance_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of legendary resistances per day (0 if none)."
+        },
+        "lair_actions": { "type": "array", "items": { "$ref": "#/definitions/Action" } },
+        "source": { "type": "string", "description": "Data source identifier (e.g. 'SRD', 'custom')." }
+      }
+    },
+    "Condition": {
+      "type": "string",
+      "description": "A D&D 5e condition name.",
+      "enum": [
+        "Blinded", "Charmed", "Deafened", "Exhaustion",
+        "Frightened", "Grappled", "Incapacitated", "Invisible",
+        "Paralyzed", "Petrified", "Poisoned", "Prone",
+        "Restrained", "Stunned", "Unconscious"
+      ]
+    },
+    "EncounterEntity": {
+      "type": "object",
+      "description": "A runtime instance of a monster or player character within the active encounter.",
+      "required": ["instance_id", "display_name", "entity_type", "initiative", "current_hp", "max_hp"],
+      "additionalProperties": false,
+      "properties": {
+        "instance_id": { "type": "string", "description": "Unique ID for this instance within the encounter (UUID recommended)." },
+        "display_name": { "type": "string", "description": "Displayed name: '<MonsterName> #<n>' for monsters, or player character name." },
+        "entity_type": { "type": "string", "enum": ["monster", "player"], "description": "Distinguishes player characters from monster instances for tie-breaking." },
+        "monster_id": { "type": "string", "description": "References MonsterDefinition.id. Required when entity_type is 'monster'." },
+        "initiative": { "type": "integer", "description": "Resolved initiative value (Dex mod + d20 roll for monsters; DM-entered for players)." },
+        "initiative_roll": { "type": "integer", "description": "The raw d20 roll used for initiative (monsters only; omitted for players)." },
+        "current_hp": { "type": "integer", "description": "Current hit points. May be 0 (unconscious/dead). Updated only by DM edits." },
+        "max_hp": { "type": "integer", "minimum": 1, "description": "Maximum hit points for this instance." },
+        "conditions": { "type": "array", "items": { "$ref": "#/definitions/Condition" }, "uniqueItems": true, "description": "Active conditions on this entity." },
+        "is_active": { "type": "boolean", "description": "Whether this entity is still active in the encounter (false = removed/dead but retained for undo)." }
+      }
+    },
+    "Encounter": {
+      "type": "object",
+      "description": "A saved encounter state, used for auto-save and restore.",
+      "required": ["encounter_id", "saved_at", "current_turn_index", "entities"],
+      "additionalProperties": false,
+      "properties": {
+        "encounter_id": { "type": "string", "description": "UUID for this encounter session." },
+        "saved_at": { "type": "string", "format": "date-time", "description": "ISO 8601 timestamp of when the save was written." },
+        "current_turn_index": { "type": "integer", "minimum": 0, "description": "Index into the entities array indicating whose turn it is." },
+        "round_number": { "type": "integer", "minimum": 1, "description": "Current combat round (1-based)." },
+        "entities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/EncounterEntity" },
+          "maxItems": 20,
+          "description": "All encounter entities in initiative order (high-to-low). Max 20."
+        }
+      }
+    }
+  }
+}
