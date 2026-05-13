@@ -112,6 +112,76 @@ impl Command for AddConditionCommand {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RemoveConditionCommand {
+    pub condition: Condition,
+    pub was_present: bool,
+}
+
+impl RemoveConditionCommand {
+    pub fn new(condition: Condition) -> Self {
+        Self {
+            condition,
+            was_present: false,
+        }
+    }
+}
+
+impl Command for RemoveConditionCommand {
+    fn execute(&mut self, combatant: &mut Combatant) {
+        self.was_present = combatant.conditions.contains(&self.condition);
+        combatant.conditions.retain(|c| c != &self.condition);
+    }
+
+    fn undo(&mut self, combatant: &mut Combatant) {
+        if self.was_present {
+            combatant.conditions.push(self.condition);
+        }
+    }
+
+    fn description(&self) -> String {
+        format!("Remove condition: {}", self.condition.name())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChangeInitiativeCommand {
+    pub new_value: i32,
+    pub old_value: Option<i32>,
+    pub old_tiebreaker: Option<u64>,
+}
+
+impl ChangeInitiativeCommand {
+    pub fn new(new_value: i32) -> Self {
+        Self {
+            new_value,
+            old_value: None,
+            old_tiebreaker: None,
+        }
+    }
+}
+
+impl Command for ChangeInitiativeCommand {
+    fn execute(&mut self, combatant: &mut Combatant) {
+        self.old_value = Some(combatant.initiative.value);
+        self.old_tiebreaker = Some(combatant.initiative.tiebreaker);
+        combatant.initiative.value = self.new_value;
+    }
+
+    fn undo(&mut self, combatant: &mut Combatant) {
+        if let Some(val) = self.old_value {
+            combatant.initiative.value = val;
+        }
+        if let Some(tb) = self.old_tiebreaker {
+            combatant.initiative.tiebreaker = tb;
+        }
+    }
+
+    fn description(&self) -> String {
+        format!("Change initiative to {}", self.new_value)
+    }
+}
+
 // Undo stack
 #[derive(Debug, Default)]
 pub struct UndoStack {
